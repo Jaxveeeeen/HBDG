@@ -600,7 +600,7 @@
       /* MEDIA QUERIES FOR SMALL MOBILE PHONES */
       @media (max-width: 480px) {
         .minion-side-container.bottom-center {
-          display: none; /* Tinanggal ang gitna sa napakaliit na phone para mas malinis */
+          display: none; 
         }
         .speech-bubble {
           font-size: 0.6rem;
@@ -803,7 +803,7 @@
       }
 
       const sfx = new SoundFX();
-      let candleBlown = false;
+      let candleBlons = false; // Fixed loop state tracker
 
       $(document).ready(function() {
 
@@ -884,8 +884,8 @@
 
         /* ACTION KAPAG HINIHIPAN ANG KANDILA */
         $('#candle-trigger').on('click', function() {
-          if (candleBlown) return;
-          candleBlown = true;
+          if (candleBlons) return;
+          candleBlons = true;
 
           sfx.playBlowOut();
 
@@ -930,14 +930,15 @@
           }, 300);
         });
 
-        /* ACTION KAPAG I-CLICK ANG RE-LIGHT CANDLE */
+        /* ACTION KAPAG I-CLICK ANG RE-LIGHT CANDLE (Loop Fix Included) */
         $('#btn-relight').on('click', function() {
-          candleBlown = false;
+          candleBlons = false;
           sfx.playChime();
 
-          // Ibalik ang apoy
+          // Clear existing tweens and reset flame properties cleanly for loop iteration
+          gsap.killTweensOf('#flame');
           $('#flame').removeClass('extinguished');
-          gsap.to('#flame', { scale: 1, opacity: 1, duration: 0.4 });
+          gsap.set('#flame', { scale: 1, opacity: 1 });
 
           // Ibalik ang blow hint
           $('#blow-hint').text('Blow Flame! 🌬️').css('background', 'rgba(255, 255, 255, 0.95)');
