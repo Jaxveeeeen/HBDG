@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+   
+    
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Cookie&family=Fredoka+One&family=Nunito:wght@600;800;900&display=swap");
+
+      *, *:before, *:after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: radial-gradient(circle at center, #f4f7f0 0%, #e2e9dc 100%);
+        min-height: 100vh;
+        overflow: hidden;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #gift-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(43, 54, 28, 0.92);
+        backdrop-filter: blur(10px);
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.8s ease, visibility 0.8s ease;
+      }
+
+      #gift-overlay.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .gift-box-wrapper {
+        text-align: center;
+        animation: pulseGift 2s ease-in-out infinite;
+      }
+
+      .gift-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+        display: inline-block;
+        animation: bounceIcon 1.5s infinite alternate;
+      }
+
+      .gift-title {
+        color: #f7f9f2;
+        font-family: 'Fredoka One', cursive;
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+
+      .gift-subtitle {
+        color: #d2e0bf;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        font-weight: 600;
+      }
+
+      .btn-open-gift {
+        background: linear-gradient(135deg, #ffda27 0%, #f39c12 100%);
+        color: #2b361c;
+        font-family: 'Fredoka One', cursive;
+        font-size: 1.6rem;
+        padding: 16px 42px;
+        border: 4px solid #fff;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(243, 156, 18, 0.5), inset 0 2px 4px rgba(255,255,255,0.8);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .btn-open-gift:hover, .btn-open-gift:active {
+        transform: scale(1.08) translateY(-4px);
+        box-shadow: 0 15px 30px rgba(243, 156, 18, 0.7), inset 0 2px 4px rgba(255,255,255,0.9);
+        background: linear-gradient(135deg, #ffe047 0%, #f1a90a 100%);
+      }
+
+      @keyframes bounceIcon {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(-18px) rotate(6deg); }
+      }
+
+      @keyframes pulseGift {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+      }
+
+      .tablet-layout {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header-title-container {
+        width: 100%;
+        text-align: center;
+        z-index: 10;
+        margin-top: 5px;
+      }
+
+      .greeting {
+        font-family: "Cookie", cursive;
+        font-size: 4.5rem;
+        color: #3b4728;
+        transform: scale(0);
+        text-align: center;
+        text-shadow: 2px 3px 0px rgba(255,255,255,0.8), 0 5px 15px rgba(59, 71, 40, 0.15);
+        line-height: 1;
+      }
+
+      .sub-greeting {
+        font-family: 'Fredoka One', cursive;
+        color: #5d6e42;
+        font-size: 1.2rem;
+        opacity: 0;
+        margin-top: 5px;
+        letter-spacing: 1px;
+      }
+
+      .stage-flex-wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        position: relative;
+      }
+
+      .initial-photos-wrapper {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: none;
+        z-index: 25;
+      }
+
+      .minion-side-container {
+        width: 190px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: auto;
+      }
+
+      .minion-side-container.bottom-center {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 180px;
+        z-index: 30;
+      }
+
+      .minion-card {
+        background: #fde047;
+        border: 4px solid #1e3a8a;
+        border-radius: 20px;
+        padding: 10px 10px 14px 10px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15), inset 0 -4px 0 rgba(0,0,0,0.1);
+        position: relative;
+        width: 100%;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(40px);
+        transition: transform 0.3s ease, opacity 0.5s ease;
+      }
+
+      .minion-card.floating-left { animation: floatCardLeft 4s ease-in-out infinite alternate; }
+      .minion-card.floating-center { animation: floatCardCenter 3.8s ease-in-out infinite alternate; }
+      .minion-card.floating-right { animation: floatCardRight 4.5s ease-in-out infinite alternate; }
+
+      @keyframes floatCardLeft {
+        0% { transform: translateY(0px) rotate(-2deg); }
+        100% { transform: translateY(-12px) rotate(2deg); }
+      }
+      @keyframes floatCardCenter {
+        0% { transform: translateY(0px) rotate(0deg); }
+        100% { transform: translateY(-10px) rotate(1deg); }
+      }
+      @keyframes floatCardRight {
+        0% { transform: translateY(0px) rotate(2deg); }
+        100% { transform: translateY(-14px) rotate(-2deg); }
+      }
+
+      .minion-goggles {
+        position: absolute;
+        top: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90px;
+        height: 26px;
+        background: #475569;
+        border-radius: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        border: 2px solid #0f172a;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      }
+
+      .goggle-eye {
+        width: 22px;
+        height: 22px;
+        background: #fff;
+        border-radius: 50%;
+        border: 3px solid #94a3b8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+
+      .goggle-pupil {
+        width: 7px;
+        height: 7px;
+        background: #451a03;
+        border-radius: 50%;
+        position: absolute;
+      }
+
+      /* GINAWANG WHITE ANG BACKGROUND NG PHOTO FRAME */
+      .photo-frame {
+        width: 100%;
+        height: 150px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 3px solid #1e3a8a;
+        background: #ffffff; /* White background */
+        margin-top: 8px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .photo-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      .speech-bubble {
+        background: #ffffff;
+        border: 2px solid #1e3a8a;
+        border-radius: 15px;
+        padding: 3px 8px;
+        font-family: 'Fredoka One', cursive;
+        color: #1e3a8a;
+        font-size: 0.8rem;
+        margin-top: 8px;
+        display: inline-block;
+        position: relative;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      }
+
+      .speech-bubble:after {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0 8px 8px 8px;
+        border-style: solid;
+        border-color: #1e3a8a transparent;
+        display: block;
+        width: 0;
+      }
+
+      .final-photo-wrapper {
+        position: absolute;
+        top: 45%;
+        left: 85%;
+        transform: translate(-50%, -50%) scale(0.5);
+        z-index: 100;
+        display: none;
+        opacity: 0;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: auto;
+      }
+
+      .final-photo-card {
+        background: linear-gradient(135deg, #fde047 0%, #facc15 100%);
+        border: 6px solid #1e3a8a;
+        border-radius: 25px;
+        padding: 18px 18px 24px 18px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.35), inset 0 -5px 0 rgba(0,0,0,0.15);
+        width: 320px;
+        text-align: center;
+        position: relative;
+        animation: floatFinalCard 3s ease-in-out infinite alternate;
+      }
+
+      @keyframes floatFinalCard {
+        0% { transform: translateY(0px) rotate(-1deg); }
+        100% { transform: translateY(-12px) rotate(1deg); }
+      }
+
+      /* GINAWANG WHITE DIN ANG BACKGROUND NG FINAL PHOTO FRAME */
+      .final-photo-frame {
+        width: 100%;
+        height: 240px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 4px solid #1e3a8a;
+        background: #ffffff; /* White background */
+        margin-top: 12px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .final-photo-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      .final-speech-bubble {
+        background: #ffffff;
+        border: 3px solid #1e3a8a;
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-family: 'Fredoka One', cursive;
+        color: #1e3a8a;
+        font-size: 1.1rem;
+        margin-top: 12px;
+        display: inline-block;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      }
+
+      .cake-center-stage {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        height: 100%;
+        width: 100%;
+      }
+
+      .svg {
+        position: absolute;
+        width: 0;
+        height: 0;
+      }
+
+      .plate {
+        position: relative;
+        width: 320px;
+        height: 95px;
+        background: #e6eae1;
+        margin-top: 80px;
+        border-radius: 50%;
+        box-shadow: 0px 12px 20px rgba(43, 54, 28, 0.25), inset 0 3px 6px #ffffff;
+        display: grid;
+        place-items: center;
+        border: 2px solid #d0d7c7;
+      }
+
+      .cake-wrap {
+        position: absolute;
+        bottom: 45%;
+      }
+
+      .cake-base {
+        position: relative;
+        width: 250px;
+        height: 65px;
+        background: #2b2326;
+      }
+
+      .cake-base .base-front {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: inherit;
+      }
+
+      .cake-base .base-front:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 100%;
+        width: 100%;
+        height: 70px;
+        transform: translateY(-50%);
+        background: inherit;
+        border-radius: 50%;
+      }
+
+      .cake-base .base-top {
+        position: absolute;
+        width: 100%;
+        height: 80px;
+        top: 0;
+        transform: translateY(-50%);
+        border-radius: 50%;
+        background: inherit;
+      }
+
+      .cake-base .base-top:before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        clip-path: polygon(0 0, 0% 50%, 100% 50%, 100% 0);
+      }
+
+      .cake-base .base-top:after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border-bottom-color: rgba(0,0,0,0.4);
+        clip-path: polygon(0 50%, 60% 50%, 60% 101%, 0 101%);
+      }
+
+      .cake-topping {
+        position: absolute;
+        bottom: 0%;
+        width: 250px;
+        height: 125px;
+        z-index: 15;
+      }
+
+      .cake-topping .topping-front {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, #3f4d2a 40%, transparent);
+      }
+
+      .cake-topping .topping-front .top-layer {
+        height: 30%;
+        background: #4b5a32;
+      }
+
+      .cake-topping .topping-front .bottom-layer {
+        position: relative;
+        height: 70%;
+        background: #4b5a32;
+        clip-path: url("#my-clip-path");
+      }
+
+      .cake-topping .topping-top {
+        background: #5a6d3c;
+        position: absolute;
+        width: 100%;
+        height: 80px;
+        top: 0;
+        transform: translateY(-50%);
+        border-radius: 50%;
+        z-index: 9;
+      }
+
+      .cake-topping .topping-top:before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        clip-path: polygon(0 0, 0% 50%, 100% 50%, 100% 0);
+      }
+
+      .cake-topping .topping-top:after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        box-shadow: inset 0 -2px 3px 2px rgba(135, 158, 98, 0.6);
+        clip-path: polygon(10% 50%, 70% 50%, 70% 101%, 10% 101%);
+      }
+
+      .candle-container {
+        width: 250px;
+        position: absolute;
+        bottom: 60%;
+        z-index: 20;
+        opacity: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .candle-container .candle-wrap {
+        position: relative;
+        width: 18px;
+        cursor: pointer;
+      }
+
+      .candle-container .flame-wrap {
+        position: relative;
+        z-index: 99;
+        width: 100%;
+        background: linear-gradient(to top, #ff9800, #ffeb3b);
+        height: 36px;
+        transform-origin: bottom center;
+        transform: scale(0);
+        clip-path: url(#my-flame-path);
+        filter: drop-shadow(0 0 10px #ff9800);
+        transition: transform 0.2s ease, opacity 0.3s ease;
+      }
+
+      .candle-container .flame-wrap.extinguished {
+        transform: scale(0) !important;
+        opacity: 0 !important;
+      }
+
+      .candle-container .candle-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translateY(-50%);
+        width: 100%;
+        height: 10px;
+        border-radius: 50%;
+        z-index: 9;
+        background: radial-gradient(#fff, #facc15);
+      }
+
+      .candle-container .candle-base {
+        position: relative;
+        width: 100%;
+        height: 90px;
+        margin: 2px 0;
+        background: repeating-linear-gradient(45deg, #facc15, #facc15 12px, #1d4ed8 12px, #1d4ed8 24px);
+        border-radius: 2px;
+      }
+
+      .candle-container .candle-base:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        background: #facc15;
+        transform: translateY(50%);
+        height: 6px;
+        width: 100%;
+        z-index: -1;
+        border-radius: 50%;
+      }
+
+      .candle-container .candle-base:after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 50%);
+        height: 12px;
+        width: 220%;
+        border-radius: 50%;
+        background: radial-gradient(rgba(59, 71, 40, 0.6), transparent);
+        z-index: -2;
+      }
+
+      .blow-hint {
+        position: absolute;
+        top: -45px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #2b361c;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-family: 'Fredoka One', cursive;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        white-space: nowrap;
+        pointer-events: none;
+        animation: hintFloat 1.5s infinite alternate;
+        border: 2px solid #a3e635;
+      }
+
+      @keyframes hintFloat {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-6px); }
+      }
+
+      .candle-container .star {
+        width: 18px;
+        height: 18px;
+        position: absolute;
+        background-color: #facc15;
+        clip-path: url(#my-star-path);
+        opacity: 0;
+      }
+
+      .candle-container .star:nth-of-type(1) { top: -30%; left: 20%; }
+      .candle-container .star:nth-of-type(2) { top: 25%; left: -15%; }
+      .candle-container .star:nth-of-type(3) { top: -15%; left: 95%; }
+      .candle-container .star:nth-of-type(4) { top: 40%; left: 80%; }
+      .candle-container .star:nth-of-type(5) { top: 65%; left: 105%; }
+
+      .bottom-controls {
+        z-index: 50;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .ctrl-btn {
+        background: #ffffff;
+        color: #3b4728;
+        border: 2px solid #a3b88c;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-family: 'Fredoka One', cursive;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        transition: all 0.2s ease;
+      }
+
+      .ctrl-btn:hover, .ctrl-btn:active {
+        background: #3b4728;
+        color: #ffffff;
+        border-color: #3b4728;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 850px) {
+        .greeting { font-size: 3.2rem; }
+        .minion-side-container { width: 140px; }
+        .minion-side-container.bottom-center { width: 130px; }
+        .photo-frame { height: 110px; }
+        .plate { width: 250px; height: 75px; }
+        .cake-base, .cake-topping, .candle-container { width: 190px; }
+        .final-photo-card { width: 260px; }
+        .final-photo-frame { height: 180px; }
+      }
+
+      @media (max-width: 600px) {
+        .tablet-layout { padding: 10px; }
+        .greeting { font-size: 2.5rem; }
+        .minion-side-container.bottom-center { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="gift-overlay">
+      <div class="gift-box-wrapper">
+        <div class="gift-icon">🎁</div>
+        <h1 class="gift-title">A Surprise Awaits!</h1>
+        <p class="gift-subtitle">Tap below to open your special birthday gift</p>
+        <button class="btn-open-gift" id="btn-start">
+          <span>Open Your Gift</span> 🎁
+        </button>
+      </div>
+    </div>
+
+    <div class="tablet-layout">
+      <div class="header-title-container">
+        <div class="greeting">Happy Birthday Janeeee!!!!</div>
+        <div class="sub-greeting" id="sub-msg">Bello! Have a Minion-tastic Birthday! 🍌</div>
+      </div>
+
+      <div class="stage-flex-wrapper">
+        <div class="initial-photos-wrapper" id="initial-photos-group">
+          
+          <div class="minion-side-container left">
+            <div class="minion-card floating-left" id="card-left">
+              <div class="minion-goggles">
+                <div class="goggle-eye"><div class="goggle-pupil"></div></div>
+                <div class="goggle-eye"><div class="goggle-pupil"></div></div>
+              </div>
+              <div class="photo-frame">
+                <img id="img-left" src="bob.png" alt="Picture 1">
+              </div>
+              <div class="speech-bubble">Bello! 🍌</div>
+            </div>
+          </div>
+
+          <div class="minion-side-container bottom-center">
+            <div class="minion-card floating-center" id="card-center">
+              <div class="minion-goggles">
+                <div class="goggle-eye" style="width:26px; height:26px;"><div class="goggle-pupil"></div></div>
+              </div>
+              <div class="photo-frame">
+                <img id="img-center" src="stuart.png" alt="Picture 2">
+              </div>
+              <div class="speech-bubble">Banana! 🍌</div>
+            </div>
+          </div>
+
+         <div class="minion-side-container right">
+            <div class="minion-card floating-right" id="card-right">
+              <div class="minion-goggles">
+                <div class="goggle-eye"><div class="goggle-pupil"></div></div>
+                <div class="goggle-eye"><div class="goggle-pupil"></div></div>
+              </div>
+              <div class="photo-frame">
+                <img id="img-right" src="kevin.png" alt="Picture 3">
+              </div>
+              <div class="speech-bubble">Poopaye! 🎉</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="final-photo-wrapper" id="final-photo-wrapper">
+          <div class="final-photo-card">
+            <div class="minion-goggles" style="width: 120px; height: 32px; top: -20px;">
+              <div class="goggle-eye" style="width: 28px; height: 28px;"><div class="goggle-pupil" style="width: 9px; height: 9px;"></div></div>
+              <div class="goggle-eye" style="width: 28px; height: 28px;"><div class="goggle-pupil" style="width: 9px; height: 9px;"></div></div>
+            </div>
+            <div class="final-photo-frame">
+              <img id="img-final" src="trio.png" alt="Final Revealed Picture">
+            </div>
+            <div class="final-speech-bubble">✨ Surprise! Happy Birthday! 💖</div>
+          </div>
+        </div>
+
+        <div class="cake-center-stage">
+          <div class="plate">
+            <div class="cake-wrap">
+              <div class="cake-topping">
+                <div class="topping-top">
+                  <div class="candle-container">
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    <div class="star"></div>
+                    
+                    <div class="candle-wrap" id="candle-trigger">
+                      <div class="blow-hint" id="blow-hint">Blow Flame! 🌬️</div>
+                      <div class="flame-wrap" id="flame"></div>
+                      <div class="candle-base">
+                        <div class="candle-top"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="topping-front">
+                  <div class="top-layer"></div>
+                  <div class="bottom-layer"></div>
+                </div>
+              </div>
+
+              <div class="cake-base">
+                <div class="base-front"></div>
+                <div class="base-top"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bottom-controls">
+        <button class="ctrl-btn" id="btn-relight">🕯️ Re-light Candle</button>
+      </div>
+    </div>
+
+    <svg class="svg">
+      <clipPath id="my-clip-path" clipPathUnits="objectBoundingBox">
+        <path d="M0,0 V0.481 s0.021,0.37,0.078,0.404 s0.035,-0.296,0.102,-0.27 s0.007,0.363,0.096,0.354 s0.028,-0.466,0.1,-0.487 S0.406,0.999,0.457,0.999 s0.03,-0.502,0.075,-0.518 s0.041,0.488,0.081,0.274 c0.007,-0.038,0.021,-0.187,0.044,-0.215 c0.014,-0.017,0.038,0.401,0.075,0.392 s0.023,-0.28,0.074,-0.392 c0.022,-0.04,0.072,0.359,0.1,0.344 c0.057,-0.029,0.094,-0.405,0.094,-0.405 V-0.001"></path>
+      </clipPath>
+      <clipPath id="my-flame-path" clipPathUnits="objectBoundingBox">
+        <path d="M0.501,0 s0.188,0.101,0.295,0.238 s0.123,0.15,0.169,0.286 S1,0.74,0.928,0.838 S0.711,1,0.501,1 S0.216,0.937,0.09,0.838 s-0.083,-0.149,0,-0.29 s0.23,-0.139,0.333,-0.276 S0.501,0,0.501,0"></path>
+      </clipPath>
+      <clipPath id="my-star-path" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0.846 l-0.309,0.154,0.044,-0.357 L0,0.382 l0.336,-0.067 L0.5,0 l0.164,0.315,0.336,0.067,-0.235,0.261,0.044,0.357"></path>
+      </clipPath>
+    </svg>
+
+    <script>
+      class SoundFX {
+        constructor() {
+          this.ctx = null;
+        }
+
+        init() {
+          if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+        }
+
+        playChime() {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+            gain.gain.setValueAtTime(0.15, now + idx * 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.8);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.12);
+            osc.stop(now + idx * 0.12 + 0.8);
+          });
+        }
+
+        playBlowOut() {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const bufferSize = this.ctx.sampleRate * 0.4;
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(800, now);
+          filter.frequency.exponentialRampToValueAtTime(100, now + 0.4);
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          noise.start(now);
+          noise.stop(now + 0.4);
+        }
+      }
+
+      const sfx = new SoundFX();
+      let candleBlown = false;
+
+      $(document).ready(function() {
+
+        const timeline = gsap.timeline({ paused: true });
+
+        timeline.fromTo('.cake-topping', {
+          yPercent: -300,
+          opacity: 0.5
+        }, {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "bounce.out"
+        });
+
+        timeline.to('.candle-container', {
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out'
+        });
+
+        timeline.to('.flame-wrap', {
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(2)"
+        });
+
+        timeline.to('.greeting', {
+          scale: 1,
+          duration: 0.7,
+          ease: "back.out(1.7)"
+        });
+
+        timeline.to('#sub-msg', {
+          opacity: 1,
+          y: -5,
+          duration: 0.4
+        });
+
+        timeline.to('.minion-card', {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 0.6,
+          ease: "back.out(1.4)"
+        });
+
+        timeline.to('.star', {
+          opacity: 0.8,
+          stagger: 0.08,
+          duration: 0.4,
+          onComplete: function () {
+            gsap.to('.star', {
+              scale: 0.3,
+              repeat: -1,
+              stagger: 0.15,
+              yoyo: true,
+              ease: "power1.inOut"
+            });
+          }
+        });
+
+        $('#btn-start').on('click', function() {
+          sfx.playChime();
+          
+          confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+
+          $('#gift-overlay').addClass('hidden');
+
+          setTimeout(() => {
+            timeline.play();
+          }, 400);
+        });
+
+        $('#candle-trigger').on('click', function() {
+          if (candleBlown) return;
+          candleBlown = true;
+
+          sfx.playBlowOut();
+
+          $('#flame').addClass('extinguished');
+          $('#blow-hint').text('Wish Granted! ✨').css('background', '#fde047');
+
+          /* PINALITAN ANG SUB-GREETING TEXT SA ENGLISH NA MENSAHE */
+          gsap.to('#sub-msg', {
+            opacity: 0,
+            y: -10,
+            duration: 0.2,
+            onComplete: function() {
+              $('#sub-msg').text('May all your birthday wishes come true! ✨🎂');
+              gsap.to('#sub-msg', { opacity: 1, y: -5, duration: 0.3 });
+            }
+          });
+
+          gsap.to('.minion-card', {
+            opacity: 0,
+            scale: 0.5,
+            y: 30,
+            duration: 0.5,
+            stagger: 0.1,
+            onComplete: function() {
+              $('.initial-photos-wrapper').css('pointer-events', 'none');
+            }
+          });
+
+          setTimeout(() => {
+            $('#final-photo-wrapper').css('display', 'flex');
+            gsap.to('#final-photo-wrapper', {
+              opacity: 1,
+              scale: 1,
+              duration: 0.8,
+              ease: "back.out(1.7)"
+            });
+          }, 400);
+
+          const duration = 2.5 * 1000;
+          const animationEnd = Date.now() + duration;
+          const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+          function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+          }
+
+          const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+              return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { 
+              particleCount, 
+              origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } 
+            }));
+            confetti(Object.assign({}, defaults, { 
+              particleCount, 
+              origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } 
+            }));
+          }, 250);
+        });
+
+        // Functionality para sa Re-light Candle button
+        $('#btn-relight').on('click', function() {
+          if(!candleBlown) return;
+          candleBlown = false;
+          
+          $('#flame').removeClass('extinguished');
+          $('#blow-hint').text('Blow Flame! 🌬️').css('background', 'rgba(255, 255, 255, 0.95)');
+
+          /* IBINABALIK ANG SUB-GREETING TEXT SA ORIHINAL */
+          gsap.to('#sub-msg', {
+            opacity: 0,
+            y: -10,
+            duration: 0.2,
+            onComplete: function() {
+              $('#sub-msg').text('Bello! Have a Minion-tastic Birthday! 🍌');
+              gsap.to('#sub-msg', { opacity: 1, y: -5, duration: 0.3 });
+            }
+          });
+          
+          gsap.to('#final-photo-wrapper', {
+            opacity: 0,
+            scale: 0.5,
+            duration: 0.5,
+            onComplete: () => {
+              $('#final-photo-wrapper').css('display', 'none');
+            }
+          });
+
+          $('.initial-photos-wrapper').css('pointer-events', 'auto');
+          
+          gsap.to('.minion-card', {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "back.out(1.4)"
+          });
+        });
+
+      });
+    </script>
+  </body>
+</html>
