@@ -500,7 +500,6 @@
         transform: scale(0);
         clip-path: url(#my-flame-path);
         filter: drop-shadow(0 0 10px #ff9800);
-        transition: transform 0.2s ease, opacity 0.3s ease;
       }
 
       .candle-container .flame-wrap.extinguished {
@@ -597,7 +596,6 @@
         border-color: #3b4728;
       }
 
-      /* MEDIA QUERIES FOR SMALL MOBILE PHONES */
       @media (max-width: 480px) {
         .minion-side-container.bottom-center {
           display: none; 
@@ -803,7 +801,7 @@
       }
 
       const sfx = new SoundFX();
-      let candleBlons = false; // Fixed loop state tracker
+      let candleBlons = false; 
 
       $(document).ready(function() {
 
@@ -892,10 +890,8 @@
           $('#flame').addClass('extinguished');
           $('#blow-hint').text('Wish Granted! ✨').css('background', '#fde047');
 
-          // Confetti explosion
           confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
 
-          // Palitan ang sub-greeting text
           gsap.to('#sub-msg', {
             opacity: 0,
             y: -10,
@@ -906,7 +902,6 @@
             }
           });
 
-          // Itago ang mga gilid na Minion cards
           gsap.to('.minion-card', {
             opacity: 0,
             scale: 0.5,
@@ -918,7 +913,6 @@
             }
           });
 
-          // Ipakita ang final reveal picture
           setTimeout(() => {
             $('#final-photo-wrapper').css('display', 'flex');
             gsap.to('#final-photo-wrapper', {
@@ -930,20 +924,22 @@
           }, 300);
         });
 
-        /* ACTION KAPAG I-CLICK ANG RE-LIGHT CANDLE (Loop Fix Included) */
+        /* ACTION KAPAG I-CLICK ANG RE-LIGHT CANDLE */
         $('#btn-relight').on('click', function() {
-          candleBlons = false;
           sfx.playChime();
 
-          // Clear existing tweens and reset flame properties cleanly for loop iteration
+          // I-clear ang anumang GSAP animation sa flame para malinis ang pag-reset
           gsap.killTweensOf('#flame');
+          
+          // Tanggalin ang extinguished class at ibalik sa scale 1 gamit ang gsap.set
           $('#flame').removeClass('extinguished');
           gsap.set('#flame', { scale: 1, opacity: 1 });
 
-          // Ibalik ang blow hint
+          // I-reset ang flag para pwede na ulit ma-blow
+          candleBlons = false;
+
           $('#blow-hint').text('Blow Flame! 🌬️').css('background', 'rgba(255, 255, 255, 0.95)');
 
-          // Itago ang final photo card
           gsap.to('#final-photo-wrapper', {
             opacity: 0,
             scale: 0.5,
@@ -952,7 +948,6 @@
               $('#final-photo-wrapper').css('display', 'none');
               $('.initial-photos-wrapper').css('pointer-events', 'auto');
               
-              // Ibalik ang mga orihinal na Minion cards
               gsap.to('.minion-card', {
                 opacity: 1,
                 scale: 1,
@@ -963,7 +958,6 @@
             }
           });
 
-          // Ibalik ang orihinal na sub-greeting text
           gsap.to('#sub-msg', {
             opacity: 0,
             duration: 0.2,
