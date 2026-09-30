@@ -6,7 +6,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-   
+    <title>Army Green Birthday Cake with Minions</title>
     
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Cookie&family=Fredoka+One&family=Nunito:wght@600;800;900&display=swap");
@@ -250,14 +250,13 @@
         position: absolute;
       }
 
-      /* GINAWANG WHITE ANG BACKGROUND NG PHOTO FRAME */
       .photo-frame {
         width: 100%;
         height: 150px;
         border-radius: 12px;
         overflow: hidden;
         border: 3px solid #1e3a8a;
-        background: #ffffff; /* White background */
+        background: #0f172a;
         margin-top: 8px;
         position: relative;
         display: flex;
@@ -329,16 +328,15 @@
         100% { transform: translateY(-12px) rotate(1deg); }
       }
 
-      /* GINAWANG WHITE DIN ANG BACKGROUND NG FINAL PHOTO FRAME */
       .final-photo-frame {
         width: 100%;
         height: 240px;
         border-radius: 16px;
         overflow: hidden;
         border: 4px solid #1e3a8a;
-        background: #ffffff; /* White background */
+        background: #0f172a;
         margin-top: 12px;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -434,25 +432,6 @@
         background: inherit;
       }
 
-      .cake-base .base-top:before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        clip-path: polygon(0 0, 0% 50%, 100% 50%, 100% 0);
-      }
-
-      .cake-base .base-top:after {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        border-bottom-color: rgba(0,0,0,0.4);
-        clip-path: polygon(0 50%, 60% 50%, 60% 101%, 0 101%);
-      }
-
       .cake-topping {
         position: absolute;
         bottom: 0%;
@@ -488,25 +467,6 @@
         transform: translateY(-50%);
         border-radius: 50%;
         z-index: 9;
-      }
-
-      .cake-topping .topping-top:before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        clip-path: polygon(0 0, 0% 50%, 100% 50%, 100% 0);
-      }
-
-      .cake-topping .topping-top:after {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        box-shadow: inset 0 -2px 3px 2px rgba(135, 158, 98, 0.6);
-        clip-path: polygon(10% 50%, 70% 50%, 70% 101%, 10% 101%);
       }
 
       .candle-container {
@@ -563,32 +523,6 @@
         margin: 2px 0;
         background: repeating-linear-gradient(45deg, #facc15, #facc15 12px, #1d4ed8 12px, #1d4ed8 24px);
         border-radius: 2px;
-      }
-
-      .candle-container .candle-base:before {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        background: #facc15;
-        transform: translateY(50%);
-        height: 6px;
-        width: 100%;
-        z-index: -1;
-        border-radius: 50%;
-      }
-
-      .candle-container .candle-base:after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: 0;
-        transform: translate(-50%, 50%);
-        height: 12px;
-        width: 220%;
-        border-radius: 50%;
-        background: radial-gradient(rgba(59, 71, 40, 0.6), transparent);
-        z-index: -2;
       }
 
       .blow-hint {
@@ -955,17 +889,6 @@
           $('#flame').addClass('extinguished');
           $('#blow-hint').text('Wish Granted! ✨').css('background', '#fde047');
 
-          /* PINALITAN ANG SUB-GREETING TEXT SA ENGLISH NA MENSAHE */
-          gsap.to('#sub-msg', {
-            opacity: 0,
-            y: -10,
-            duration: 0.2,
-            onComplete: function() {
-              $('#sub-msg').text('May all your birthday wishes come true! ✨🎂');
-              gsap.to('#sub-msg', { opacity: 1, y: -5, duration: 0.3 });
-            }
-          });
-
           gsap.to('.minion-card', {
             opacity: 0,
             scale: 0.5,
@@ -1014,24 +937,12 @@
           }, 250);
         });
 
-        // Functionality para sa Re-light Candle button
         $('#btn-relight').on('click', function() {
           if(!candleBlown) return;
           candleBlown = false;
           
           $('#flame').removeClass('extinguished');
           $('#blow-hint').text('Blow Flame! 🌬️').css('background', 'rgba(255, 255, 255, 0.95)');
-
-          /* IBINABALIK ANG SUB-GREETING TEXT SA ORIHINAL */
-          gsap.to('#sub-msg', {
-            opacity: 0,
-            y: -10,
-            duration: 0.2,
-            onComplete: function() {
-              $('#sub-msg').text('Bello! Have a Minion-tastic Birthday! 🍌');
-              gsap.to('#sub-msg', { opacity: 1, y: -5, duration: 0.3 });
-            }
-          });
           
           gsap.to('#final-photo-wrapper', {
             opacity: 0,
