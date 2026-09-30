@@ -596,18 +596,20 @@
         border-color: #3b4728;
       }
 
-      @media (max-width: 480px) {
-        .minion-side-container.bottom-center {
-          display: none; 
-        }
-        .speech-bubble {
-          font-size: 0.6rem;
-          padding: 1px 4px;
-        }
-        .bottom-controls {
-          margin-bottom: 4px;
-        }
-      }
+     @media (max-width: 480px) {
+  .minion-side-container.bottom-center {
+    display: flex;       /* Tanggalin ang display: none */
+    bottom: 15%;         /* Ibaba ang pwesto para hindi lumagpas sa screen */
+    transform: translateX(-50%) scale(0.8); /* Paliitin nang konti para magkasya */
+  }
+  .speech-bubble {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+  }
+  .bottom-controls {
+    margin-bottom: 4px;
+  }
+}
     </style>
   </head>
   <body>
